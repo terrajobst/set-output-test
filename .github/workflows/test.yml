@@ -1,0 +1,34 @@
+name: Validate
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+ 
+    - name: Clone repo
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.x
+
+    - name: Restore
+      run: dotnet restore src/test/test.csproj
+
+    - name: Build
+      run: dotnet build src/test/test.csproj --configuration Release --no-restore --nologo
+
+    - name: Run
+      id: get-data
+      run: dotnet run --project src/test/test.csproj
+
+    - name: Get Values
+      run: |
+        echo pull_request_number = ${{ steps.get-data.outputs.pull_request_number }}
+        echo pull_request_is_closed = ${{ steps.get-data.outputs.pull_request_is_closed }}
+        echo pull_request_is_merged = ${{ steps.get-data.outputs.pull_request_is_merged }}
